@@ -1,7 +1,10 @@
-version: '3.8'
-
+version: '3'
 services:
-  web:
-    build: .
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "8888:8888"  # Mapper le port 8888 du conteneur à l'hôte
+    volumes:
+      - ./app:/app  # Monter le répertoire app dans le conteneur
