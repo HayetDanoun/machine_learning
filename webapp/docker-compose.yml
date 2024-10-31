@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  webapp:
+    build: .  # Construire l'image à partir du Dockerfile dans le même répertoire
+    ports:
+      - "5000:5000"  # Mapper le port 5000 de l'hôte au port 5000 du conteneur
+    volumes:
+      - .:/app  # Monter le répertoire actuel dans le conteneur
+    environment:
+      - FLASK_ENV=development  # Mettre l'application en mode développement
