@@ -1,11 +1,11 @@
 # Utiliser une image de base Jupyter
 FROM jupyter/scipy-notebook:latest
 
-# Définir le répertoire de travail dans le conteneur
-WORKDIR /app
+# Définir le répertoire de travail dans le conteneur comme 'scripts'
+WORKDIR /scripts
 
-# Copier le contenu du dossier app dans le conteneur
-COPY ./app /app
+# Copier le contenu du dossier courant dans le conteneur
+COPY . /scripts
 
 # Exposer le port sur lequel Jupyter s'exécute
 EXPOSE 8888
