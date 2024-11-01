@@ -1,14 +1,18 @@
-# Utiliser une image de base Jupyter
-FROM jupyter/scipy-notebook:latest
+# Utiliser une image de base de Python
+FROM python:3.9
 
-# Définir le répertoire de travail dans le conteneur comme 'scripts'
-WORKDIR /scripts
+# Définir le répertoire de travail
+WORKDIR /app
 
-# Copier le contenu du dossier courant dans le conteneur
-COPY . /scripts
+# Copier le fichier de dépendances et l'installer
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Exposer le port sur lequel Jupyter s'exécute
-EXPOSE 8888
+# Copier le code de l'application
+COPY . .
 
-# Commande pour démarrer Jupyter Notebook
-CMD ["start-notebook.sh", "--NotebookApp.token=''"]
+# Exposer le port 8081
+EXPOSE 8081
+
+# Lancer l'application Streamlit
+CMD ["streamlit", "run", "api.py", "--server.port=8081", "--server.address=0.0.0.0"]

@@ -1,11 +1,15 @@
 version: '3.8'
+networks:
+  serving_prod_net:
+    external: true
 
 services:
   webapp:
-    build: .  # Construire l'image à partir du Dockerfile dans le même répertoire
+    container_name: webapp
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"  # Mapper le port 5000 de l'hôte au port 5000 du conteneur
-    volumes:
-      - .:/app  # Monter le répertoire actuel dans le conteneur
-    environment:
-      - FLASK_ENV=development  # Mettre l'application en mode développement
+      - "8081:8081"
+    networks:
+      - serving_prod_net
