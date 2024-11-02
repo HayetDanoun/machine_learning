@@ -3,12 +3,11 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-class Item(BaseModel):
-    name: str
-    value: float
+# Modèle de données pour le mot
+class WordRequest(BaseModel):
+    word: str
 
-@app.post("/predict")
-async def predict(item: Item):
-    return {
-        "message": f"Received item with name: {item.name} and value: {item.value}"
-    }
+@app.post("/duplicate")
+def duplicate_word(request: WordRequest):
+    duplicated_word = request.word * 2  # Duplique le mot
+    return {"duplicated_word": duplicated_word}

@@ -1,4 +1,5 @@
-version: '3.8'
+
+version: '3'
 networks:
   prod_net:
     driver: bridge
@@ -7,12 +8,24 @@ services:
   serving-api:
     container_name: serving-api
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: .  # Contexte de construction pour `serving-api`
+      dockerfile: Dockerfile  # Dockerfile de `serving-api` dans `serving`
     volumes:
       - ../data:/data
       - ../artifacts:/artifacts
     ports:
       - "8080:8080"
+    networks:
+      - prod_net
+
+  notebook:
+    container_name: notebook
+    build:
+      context: ..  # Contexte de construction vers la racine du projet
+      dockerfile: Dockerfile  # Dockerfile pour le notebook à la racine
+    ports:
+      - "8888:8888"  # Expose le port pour accéder au notebook
+    volumes:
+      - ../scripts:/scripts  # Monte le dossier `scripts` dans le conteneur
     networks:
       - prod_net
