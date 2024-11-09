@@ -21,7 +21,7 @@ class ImageTransformer:
             return None
 
 # Fonction pour sauvegarder la classe avec la méthode dans un fichier pickle
-def save_image_model(image_transformer, model_path='/app/artifacts/pca.pickle'):
+def save_image_model(image_transformer, model_path=r"C:\Users\joeto\projetfina_ML\artifacts\pca.pickle"):
     """Sauvegarde l'objet contenant la fonction de transformation d'image dans un fichier pickle."""
     with open(model_path, 'wb') as f:
         pickle.dump(image_transformer, f)
@@ -31,7 +31,4 @@ def save_image_model(image_transformer, model_path='/app/artifacts/pca.pickle'):
 transformer = ImageTransformer()
 save_image_model(transformer)
 
-# Exemple de chargement de l'objet depuis le pickle dans votre API FastAPI
-with open('/app/artifacts/pca.pickle', 'rb') as f:
-    image_transformer_from_pickle = pickle.load(f)
 
