@@ -1,31 +1,40 @@
 import streamlit as st
 import requests
+from PIL import Image
+import io
 
-# URL de l'API FastAPI (en local, mais elle peut être modifiée si nécessaire)
-API_URL = "http://fastapi_serving:8000/predict"  # Adaptez selon l'adresse de votre API
+# URL de l'API FastAPI
+API_URL = "http://fastapi_serving:8000/predict"
 
-# Interface Streamlit
-st.title("Prédiction avec le modèle")
+st.title("Prédiction avec le modèle d'image")
 
-# Demander à l'utilisateur d'entrer les caractéristiques
-st.write("Entrez les valeurs des caractéristiques pour la prédiction:")
+# Télécharger une image
+uploaded_image = st.file_uploader("Téléchargez une image", type=["jpg", "jpeg", "png"])
 
-# Créer des champs de saisie pour chaque caractéristique
-features = []
-for i in range(5):  # Supposons que vous ayez 5 caractéristiques, ajustez si nécessaire
-    value = st.number_input(f"Caractéristique {i + 1}", value=0.0)
-    features.append(value)
+if uploaded_image is not None:
+    # Convertir l'image téléchargée en un format attendu
+    image = Image.open(uploaded_image)
+    image = image.resize((224, 224))  # Redimensionne si nécessaire pour le modèle
 
-# Bouton pour soumettre la requête
-if st.button("Prédire"):
-    # Préparer les données pour l'API
-    data = {"features": features}
-    
-    # Envoyer la requête à l'API de prédiction
-    response = requests.post(API_URL, json=data)
-    
-    if response.status_code == 200:
-        prediction = response.json()["prediction"]
-        st.write(f"La prédiction obtenue est : {prediction}")
-    else:
-        st.error("Erreur dans la prédiction. Veuillez réessayer.")
+    # Afficher l'image téléchargée
+    st.image(image, caption="Image téléchargée", use_column_width=True)
+
+    if st.button("Prédire"):
+        # Convertir l'image en bytes et l'envoyer à l'API
+        img_bytes = io.BytesIO()
+        image.save(img_bytes, format="JPEG")
+        img_bytes = img_bytes.getvalue()
+
+        # Sending the image with the correct format
+        files = {'file': ('image.jpg', img_bytes, 'image/jpeg')}
+        
+        try:
+            response = requests.post(API_URL, files=files)
+
+            if response.status_code == 200:
+                prediction = response.json().get("prediction", "Aucune prédiction reçue.")
+                st.write(f"La prédiction obtenue est : {prediction}")
+            else:
+                st.error(f"Erreur lors de la prédiction: {response.status_code} - {response.text}")
+        except Exception as e:
+            st.error(f"Erreur lors de l'appel à l'API: {str(e)}")
