@@ -5,6 +5,7 @@ import io
 
 # URL de l'API FastAPI
 API_URL = "http://fastapi_serving:8000/predict"
+VALIDATE_URL = "http://fastapi_serving:8000/validate"
 
 st.title("Prédiction avec le modèle d'image")
 
@@ -38,3 +39,14 @@ if uploaded_image is not None:
                 st.error(f"Erreur lors de la prédiction: {response.status_code} - {response.text}")
         except Exception as e:
             st.error(f"Erreur lors de l'appel à l'API: {str(e)}")
+
+    if st.button("Valider"):
+        try:
+            validate_response = requests.post(VALIDATE_URL)
+
+            if validate_response.status_code == 200:
+                st.success("Vecteur validé et enregistré!")
+            else:
+                st.error(f"Erreur lors de la validation du vecteur: {validate_response.text}")
+        except Exception as e:
+            st.error(f"Erreur lors de l'appel à l'API de validation: {str(e)}")
