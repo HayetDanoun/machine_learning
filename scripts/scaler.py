@@ -29,10 +29,3 @@ def normalize_data(X_train, X_test):
         print(f"Erreur lors de la sauvegarde du scaler : {e}")
     
     return X_train_normalized, X_test_normalized, scaler
-
-# Exemple de données pour tester la fonction
-X_train = np.array([[1, 2], [3, 4], [5, 6]])  # Exemple de données d'entraînement
-X_test = np.array([[7, 8], [9, 10]])          # Exemple de données de test
-
-# Appel de la fonction avec les données
-X_train_normalized, X_test_normalized, scaler = normalize_data(X_train, X_test)
