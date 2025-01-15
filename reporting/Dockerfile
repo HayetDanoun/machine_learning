@@ -1,0 +1,15 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN echo test >> test.log
+RUN cat test.log
+
+RUN pip show evidently  
+
+COPY . .
+
+CMD ["sh", "-c", "python project.py && evidently ui --host 0.0.0.0 --port 8082"]
