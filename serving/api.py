@@ -1,14 +1,16 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi.staticfiles import StaticFiles
 import pickle
 import numpy as np
 from PIL import Image
 import io
 import csv
+import os
 
 # Variable globale pour stocker le dernier vecteur
 last_feature = None
-pre=None
-print("helloo")
+pre = None
+
 # Fonction pour transformer l'image en vecteur
 def image_to_vector(image):
     try:
@@ -27,9 +29,8 @@ try:
         print(" loading model ")
 
         if hasattr(model, 'use_label_encoder'):
-          print("okkkk")
-          model.use_label_encoder = False
-
+            print("okkkk")
+            model.use_label_encoder = False
 
     with open("/app/artifacts/scaler.pickle", "rb") as f1:
         scaler = pickle.load(f1)
@@ -41,6 +42,9 @@ except Exception as e:
 
 # Créer l'application FastAPI
 app = FastAPI()
+
+# Mount the static files directory
+app.mount("/reporting", StaticFiles(directory="/app/reporting"), name="reporting")
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
@@ -65,35 +69,13 @@ async def predict(file: UploadFile = File(...)):
         
         if isinstance(prediction[0], str):
             return {"prediction": prediction[0]}
-        pre=prediction[0]
+        pre = prediction[0]
         print(pre)
         return {"prediction": int(prediction[0])}
         
     except Exception as e:
         print(f"Error during prediction: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-""""
-@app.post("/validate")
-async def validate():
-    global last_feature  # Accéder à la variable globale
-
-    if last_feature is None:
-        raise HTTPException(status_code=400, detail="Aucune prédiction précédente. Veuillez d'abord effectuer une prédiction.")
-    
-    try:
-        # Sauvegarder les caractéristiques validées dans un fichier CSV
-        with open("/app/data/prod_data.csv", "a", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(last_feature)
-            print("Vecteur validé et enregistré dans le fichier CSV.")
-
-        return {"message": "Vecteur validé et enregistré!"}
-
-    except Exception as e:
-        print(f"Error during validation: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-"""
-
 
 @app.post("/validate")
 async def validate():
@@ -109,17 +91,15 @@ async def validate():
         import pandas as pd
 
         with open(prod_data_path, "a", newline="") as f:
-           feature_array = np.array(last_feature).reshape(1, -1)
-           df = pd.DataFrame(feature_array, columns=[f"feature{i+1}" for i in range(len(last_feature))])
+            feature_array = np.array(last_feature).reshape(1, -1)
+            df = pd.DataFrame(feature_array, columns=[f"feature{i+1}" for i in range(len(last_feature))])
         
-          # df['prediction'] = pre
-          # df['realite'] = pre
-           df['prediction'] = "true"
-           df['realite'] = "true"
+            df['prediction'] = "true"
+            df['realite'] = "true"
 
-           df.to_csv(prod_data_path, mode='a', header=False, index=False)
+            df.to_csv(prod_data_path, mode='a', header=False, index=False)
 
-           print("Vecteur validé et enregistré dans le fichier CSV.")
+            print("Vecteur validé et enregistré dans le fichier CSV.")
 
         # Vérifier si prod_data.csv atteint 10 lignes
         with open(prod_data_path, "r") as f:
@@ -127,24 +107,20 @@ async def validate():
             rows = list(reader)
         
         if len(rows) >= 10:
-           
             # Charger les nouvelles données et les données de référence
             prod_data = pd.read_csv(prod_data_path, header=None)
             ref_data = pd.read_csv(ref_data_path)
             print(prod_data.head())
 
-            
             # Préparation des données pour l'entraînement
             X = prod_data.iloc[:, :-1]  # Sélectionne toutes les colonnes sauf la dernière
-            y = prod_data.iloc[:, -1] 
-            
-            
+            y = prod_data.iloc[:, -1]
 
             # Normalisation des données
             X_scaled = scaler.transform(X)
 
             # Réentraîner le modèle avec un entraînement incrémental
-           # model.partial_fit(X_scaled, y, classes=np.unique(y))
+            # model.partial_fit(X_scaled, y, classes=np.unique(y))
 
             # Sauvegarder le modèle et le scaler
             with open("/app/artifacts/model.pickle", "wb") as f:
@@ -158,9 +134,7 @@ async def validate():
 
     except Exception as e:
         print(f"Error during validation: {e}")
-        raise HTTPException(status_code=500, detail=str(e))        
-      
-
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/invalidate")
 async def invalidate():
@@ -180,10 +154,7 @@ async def invalidate():
             feature_array = np.array(last_feature).reshape(1, -1)
             df = pd.DataFrame(feature_array, columns=[f"feature{i+1}" for i in range(len(last_feature))])
             
-            # Ajouter la colonne 'label' avec l'étiquette inversée
-            #df['prediction'] =  pre
-            #df['realite'] = 1 - pre  # Inverser l'étiquette
-            df['prediction'] = "false" 
+            df['prediction'] = "false"
             df['realite'] = "true"
             df.to_csv(prod_data_path, mode='a', header=False, index=False)
 

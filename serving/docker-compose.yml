@@ -1,8 +1,8 @@
 version: '3.8'
 
 networks:
-  prod_net:
-    driver: bridge
+  serving_prod_net:
+    external: true
 
 services:
   fastapi_serving:
@@ -12,9 +12,13 @@ services:
       - ../artifacts:/app/artifacts
       - ../data:/app/data
       - ../scripts:/app/scripts
+      - report_data:/app/reporting  # Shared volume for report data
     ports:
       - "8000:8000"
     working_dir: /app
     command: ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
     networks:
-      - prod_net
+      - serving_prod_net
+
+volumes:
+  report_data:

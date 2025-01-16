@@ -1,7 +1,13 @@
+version: '3.8'
+
 services:
   evidently:
     build: .
     volumes:
       - ../data:/app/data
+      - report_data:/app/reporting  # Shared volume for report data
     ports:
       - "8082:8082"
+
+volumes:
+  report_data:
