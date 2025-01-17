@@ -2,74 +2,62 @@ from fastapi import FastAPI
 import streamlit as st
 import json
 import pandas as pd
+import plotly.express as px
+from datetime import datetime
 
 app = FastAPI()
 
-def process_report_metrics(report_data):
-    """Extract and process key metrics from the report"""
-    summary = {
-        'Dataset Statistics': [],
-        'Column Drift Details': []
-    }
-    
-    # Process main dataset drift metrics
-    for metric in report_data.get('metrics', []):
-        if metric['metric'] == 'DatasetDriftMetric':
-            result = metric['result']
-            summary['Dataset Statistics'] = [{
-                'Metric': 'Total Columns',
-                'Value': result['number_of_columns']
-            }, {
-                'Metric': 'Drifted Columns',
-                'Value': result['number_of_drifted_columns']
-            }, {
-                'Metric': 'Drift Share',
-                'Value': f"{result['drift_share']*100:.2f}%"
-            }]
-        
-        # Process column-level drift details
-        elif metric['metric'] == 'DataDriftTable':
-            drift_columns = []
-            for col, details in metric['result'].get('drift_by_columns', {}).items():
-                if isinstance(details, dict):  # Skip any malformed entries
-                    drift_columns.append({
-                        'Column': col,
-                        'Drift Score': f"{details['drift_score']:.4f}",
-                        'Drift Detected': '🔴 Yes' if details['drift_detected'] else '🟢 No'
-                    })
-            summary['Column Drift Details'] = drift_columns[:10]  # Show only top 10 columns
-            
-    return summary
-
-@app.get("/")
-async def serve_report():
-    with open("/app/reporting/report.json", "r") as f:
-        report_data = json.load(f)
-    return report_data
+def create_quality_plot(drift_share, missing_values_share):
+    df = pd.DataFrame({
+        'Metric': ['Drift Share', 'Missing Values Share'],
+        'Value': [drift_share, missing_values_share]
+    })
+    fig = px.bar(df, x='Metric', y='Value', title='Dataset Quality')
+    return fig
 
 def main():
-    st.title("Data Drift Analysis Dashboard")
+    st.title("Data Drift Monitoring Dashboard")
     
     try:
         with open("/app/reporting/report.json", "r") as f:
             report_data = json.load(f)
         
-        # Process and display metrics
-        summary = process_report_metrics(report_data)
+        # Dataset Overview
+        st.header("Dataset Analysis")
         
-        # Display dataset statistics
-        st.header("Dataset Overview")
-        st.table(pd.DataFrame(summary['Dataset Statistics']))
+        # Model Statistics
+        col1, col2 = st.columns(2)
+        with col1:
+            total_columns = report_data['metrics'][0]['result']['number_of_columns']
+            st.metric("Total Features", total_columns)
         
-        # Display column drift details
-        st.header("Column Drift Analysis (Top 10 Columns)")
-        st.dataframe(pd.DataFrame(summary['Column Drift Details']))
+        with col2:
+            drift_share = report_data['metrics'][0]['result']['share_of_drifted_columns']
+            st.metric("Drift Share", f"{drift_share:.2%}")
         
-        # Add timestamp
+        # Dataset Quality Plot
+        st.header("Dataset Quality")
+        missing_values = report_data['metrics'][1]['result']['current']['share_of_missing_values']
+        quality_fig = create_quality_plot(drift_share, missing_values)
+        st.plotly_chart(quality_fig)
+        
+        # Column Drift Analysis
+        st.header("Feature Drift Analysis")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            drift_score_0 = report_data['metrics'][2]['result']['drift_score']
+            st.metric("Feature 0 Drift Score", f"{drift_score_0:.4f}")
+            
+        with col2:
+            drift_score_1 = report_data['metrics'][3]['result']['drift_score']
+            st.metric("Feature 1 Drift Score", f"{drift_score_1:.4f}")
+        
+        # Timestamp
         st.sidebar.info(f"Report generated on: {report_data.get('timestamp', 'N/A')}")
         
     except Exception as e:
-        st.error(f"Error loading report: {str(e)}")
+        st.error(f"Error loading dashboard: {str(e)}")
 
 if __name__ == "__main__":
     main()

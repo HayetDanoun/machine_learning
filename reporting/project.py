@@ -8,6 +8,10 @@ import numpy as np
 from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset
 
+from evidently.metrics import ColumnDriftMetric
+from evidently.metrics import DatasetDriftMetric
+from evidently.metrics import DatasetMissingValuesMetric
+
 try:
     # Load reference and production data
     print("Loading data...")
@@ -80,7 +84,17 @@ try:
 
     # Create and generate the report
     print("\nGenerating report...")
-    report = Report(metrics=[DataDriftPreset()])
+
+    # Create and generate the report
+    print("\nGenerating report...")
+    report = Report(
+        metrics=[
+            DatasetDriftMetric(),
+            DatasetMissingValuesMetric(),
+            ColumnDriftMetric(column_name="0", stattest="wasserstein"),
+            ColumnDriftMetric(column_name="1", stattest="wasserstein")
+        ]
+    )
 
     # Calculate report with processed data
     print("Calculating report...")
