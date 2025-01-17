@@ -10,8 +10,9 @@ RUN mkdir -p /app/reporting
 
 COPY . .
 
-# Create start script using python -m for evidently
-RUN echo '#!/bin/bash\npython project.py\ncd /app/reporting\npython -m http.server 8082' > /app/reporting/start.sh
-RUN chmod +x /app/reporting/start.sh
+# Expose the FastAPI and Streamlit ports
+EXPOSE 8000
+EXPOSE 8501
 
-CMD ["/app/reporting/start.sh"]
+# Run services sequentially
+CMD ["sh", "-c", "python project.py && streamlit run api.py --server.port=8501 --server.address=0.0.0.0 & uvicorn api:app --host 0.0.0.0 --port 8000"]

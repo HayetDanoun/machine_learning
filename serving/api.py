@@ -6,6 +6,7 @@ from PIL import Image
 import io
 import csv
 import os
+import subprocess
 
 # Variable globale pour stocker le dernier vecteur
 last_feature = None
@@ -193,4 +194,14 @@ async def invalidate():
 
     except Exception as e:
         print(f"Erreur lors de la non-validation : {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/report")
+async def get_report():
+    try:
+        # Start the Streamlit app
+        subprocess.Popen(["streamlit", "run", "/app/reporting/app.py", "--server.port=8501", "--server.address=0.0.0.0"])
+        return {"message": "Streamlit app started on port 8501"}
+    except Exception as e:
+        print(f"Error starting Streamlit app: {e}")
         raise HTTPException(status_code=500, detail=str(e))

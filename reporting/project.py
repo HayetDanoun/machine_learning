@@ -82,24 +82,15 @@ try:
     print("\nGenerating report...")
     report = Report(metrics=[DataDriftPreset()])
 
-    # Convert report to dictionary and print
-    report_dict = report.as_dict()
-    print("\nReport Results:")
-    print(report_dict)
-    
     # Calculate report with processed data
     print("Calculating report...")
     report.run(reference_data=ref_data_sample, current_data=new_prod_data_sample)
     print("Report completed.")
-    report.save_html("/app/reporting/report.html")
-    print("Report saved.")
+    
+    # Save report as JSON
+    report.save_json("/app/reporting/report.json")
+    print("Report saved as JSON.")
 
-    # Append custom HTML content
-    with open("/app/reporting/report.html", "a") as report_file:
-        report_file.write("<hr>")
-        report_file.write('<a href="/">Back to main page</a>')
-        report_file.write("<p>Custom content added to the report.</p>")
-    print("Custom content added to the report.")
 except Exception as e:
     print(f"An error occurred: {e}")
     import traceback
