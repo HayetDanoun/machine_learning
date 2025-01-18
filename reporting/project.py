@@ -66,17 +66,30 @@ try:
     ref_data[numeric_cols] = ref_data[numeric_cols].astype(float)
     new_prod_data[numeric_cols] = new_prod_data[numeric_cols].astype(float)
 
+     # Set sample size and random seed for reproducibility
+    DESIRED_SAMPLE_SIZE = 100
+    RANDOM_SEED = 42
+
     print("\nVerifying data shapes:")
     print(f"Reference data shape: {ref_data.shape}")
     print(f"Production data shape: {new_prod_data.shape}")
     
-    # Take a small subset of the data for testing
-    ref_data_sample = ref_data.head(10)
-    new_prod_data_sample = new_prod_data.head(10)
+    # Determine actual sample size based on available data
+    ref_sample_size = min(DESIRED_SAMPLE_SIZE, len(ref_data))
+    prod_sample_size = min(DESIRED_SAMPLE_SIZE, len(new_prod_data))
 
-    print("\nVerifying data shapes:")
-    print(f"Reference data shape: {ref_data_sample.shape}")
-    print(f"Production data shape: {new_prod_data_sample.shape}")
+    if prod_sample_size < DESIRED_SAMPLE_SIZE:
+        print(f"\nWarning: Production data has fewer samples ({len(new_prod_data)}) than desired ({DESIRED_SAMPLE_SIZE})")
+        print(f"Using all available production data samples: {prod_sample_size}")
+    
+    # Take a random subset of the data for testing
+    ref_data_sample = ref_data.sample(n=ref_sample_size, random_state=RANDOM_SEED)
+    new_prod_data_sample = new_prod_data.sample(n=prod_sample_size, random_state=RANDOM_SEED)
+
+    print(f"\nVerifying sampled data shapes:")
+    print(f"Reference data sample shape: {ref_data_sample.shape}")
+    print(f"Production data sample shape: {new_prod_data_sample.shape}")
+
     
     print("\nVerifying column alignment:")
     print("First 5 columns of reference data:", list(ref_data_sample.columns[:5]))
@@ -84,17 +97,17 @@ try:
 
     # Create and generate the report
     print("\nGenerating report...")
+    selected_metrics = [
+        DatasetDriftMetric(),
+        DatasetMissingValuesMetric(),
+        ColumnDriftMetric(column_name="0", stattest="wasserstein"),
+        ColumnDriftMetric(column_name="1", stattest="wasserstein")
+    ]
+    print("Selected metrics for the report:")
+    for metric in selected_metrics:
+        print(f"- {metric.__class__.__name__}")
 
-    # Create and generate the report
-    print("\nGenerating report...")
-    report = Report(
-        metrics=[
-            DatasetDriftMetric(),
-            DatasetMissingValuesMetric(),
-            ColumnDriftMetric(column_name="0", stattest="wasserstein"),
-            ColumnDriftMetric(column_name="1", stattest="wasserstein")
-        ]
-    )
+    report = Report(metrics=selected_metrics)
 
     # Calculate report with processed data
     print("Calculating report...")
