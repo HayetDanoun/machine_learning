@@ -1,3 +1,4 @@
+
 Classifieur Chat-Chien
 
 Ce projet a pour objectif de développer un classifieur capable de différencier les images de chats et de chiens en utilisant des algorithmes de machine learning supervisé. Plusieurs modèles ont été testés et comparés afin de sélectionner celui offrant les meilleures performances comme modèle final.
