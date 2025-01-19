@@ -259,6 +259,7 @@ with feedback_col2:
                 invalidate_response = requests.post(API_INVALIDATE_URL, json=payload)
                 if invalidate_response.status_code == 200:
                     st.success("Feedback envoyé avec l'étiquette correcte. Merci !")
+                    st.snow()
                 else:
                     st.error(f"Erreur lors de la non-validation : {invalidate_response.text}")
             except Exception as e:
