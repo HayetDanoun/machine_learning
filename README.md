@@ -10,13 +10,19 @@ Clonez le dépôt et passez à la branche master2
 
 Dans le dossier serving, exécutez la commande pour construire et démarrer le service :
 
+```
 docker-compose up --build
+```
 
 Dans le dossier webapp, exécutez la commande pour démarrer l'application Streamlit :
 
+```
 docker-compose up --build
+```
 
 Dans le dossier reporting, exécutez la commande pour démarrer l'application Streamlit :
 
+```
 docker-compose up --build
+```
 Attention, le calcules du rapport peut prendre plusieurs minutes.
