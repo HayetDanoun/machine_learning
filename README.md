@@ -6,7 +6,6 @@ Branche principale
 Le code final du projet est disponible sur la branche master2.
 Setup du projet
 
-Clonez le dépôt et passez à la branche master2
 
 Dans le dossier serving, exécutez la commande pour construire et démarrer le service :
 
