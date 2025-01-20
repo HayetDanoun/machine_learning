@@ -3,7 +3,9 @@
 ## Introduction
 Ce projet a pour objectif de développer un classifieur capable de différencier les images de chats et de chiens en utilisant des algorithmes de machine learning supervisés. Plusieurs modèles ont été testés et comparés afin de sélectionner celui offrant les meilleures performances pour le modèle final.
 
-## Branche Principale
+## Git
+Ce projet peut être retrouvée en suivant ce lien https://github.com/toubia-j/machine_learning.
+
 Le code final du projet est disponible sur la branche `main`.
 
 ## Auteurs
