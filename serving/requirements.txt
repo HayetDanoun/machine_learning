@@ -1,10 +1,10 @@
 fastapi
-uvicorn
+uvicorn[standard]
+gunicorn
 scikit-learn
 numpy
 pandas
 Pillow
 python-multipart
 matplotlib
-flask
 xgboost
